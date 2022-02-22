@@ -27,17 +27,18 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-jet-template/apis/v1alpha1"
+	"github.com/crossplane-contrib/provider-jet-ec/apis/v1alpha1"
 )
 
 const (
 	keyUsername = "username"
 	keyPassword = "password"
-	keyHost     = "host"
+	keyHost     = "endpoint"
 
-	// Template credentials environment variable names
-	envUsername = "HASHICUPS_USERNAME"
-	envPassword = "HASHICUPS_PASSWORD"
+	// EC credentials environment variable names
+	envUsername = "username"
+	envPassword = "password"
+	envHost     = "endpoint"
 )
 
 const (
@@ -48,7 +49,7 @@ const (
 	errGetProviderConfig    = "cannot get referenced ProviderConfig"
 	errTrackUsage           = "cannot track ProviderConfig usage"
 	errExtractCredentials   = "cannot extract credentials"
-	errUnmarshalCredentials = "cannot unmarshal template credentials as JSON"
+	errUnmarshalCredentials = "cannot unmarshal ec credentials as JSON"
 )
 
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
@@ -81,19 +82,19 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		if err != nil {
 			return ps, errors.Wrap(err, errExtractCredentials)
 		}
-		templateCreds := map[string]string{}
-		if err := json.Unmarshal(data, &templateCreds); err != nil {
+		ecCreds := map[string]string{}
+		if err := json.Unmarshal(data, &ecCreds); err != nil {
 			return ps, errors.Wrap(err, errUnmarshalCredentials)
 		}
 
 		// set provider configuration
 		ps.Configuration = map[string]interface{}{
-			"host": templateCreds[keyHost],
+			envHost: ecCreds[keyHost],
 		}
 		// set environment variables for sensitive provider configuration
 		ps.Env = []string{
-			fmt.Sprintf(fmtEnvVar, envUsername, templateCreds[keyUsername]),
-			fmt.Sprintf(fmtEnvVar, envPassword, templateCreds[keyPassword]),
+			fmt.Sprintf(fmtEnvVar, envUsername, ecCreds[keyUsername]),
+			fmt.Sprintf(fmtEnvVar, envPassword, ecCreds[keyPassword]),
 		}
 		return ps, nil
 	}
