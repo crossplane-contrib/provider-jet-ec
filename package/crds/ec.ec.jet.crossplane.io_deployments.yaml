@@ -1,0 +1,687 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.6.2
+  creationTimestamp: null
+  name: deployments.ec.ec.jet.crossplane.io
+spec:
+  group: ec.ec.jet.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - ecjet
+    kind: Deployment
+    listKind: DeploymentList
+    plural: deployments
+    singular: deployment
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Deployment is the Schema for the Deployments API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DeploymentSpec defines the desired state of Deployment
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource.
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  alias:
+                    description: Optional deployment alias that affects the format
+                      of the resource URLs
+                    type: string
+                  apm:
+                    description: Optional APM resource definition
+                    items:
+                      properties:
+                        config:
+                          description: Optionally define the Apm configuration options
+                            for the APM Server
+                          items:
+                            properties:
+                              debugEnabled:
+                                description: Optionally enable debug mode for APM
+                                  servers - defaults to false
+                                type: boolean
+                              dockerImage:
+                                description: Optionally override the docker image
+                                  the APM nodes will use. Note that this field will
+                                  only work for internal users only.
+                                type: string
+                              userSettingsJson:
+                                description: An arbitrary JSON object allowing (non-admin)
+                                  cluster owners to set their parameters (only one
+                                  of this and 'user_settings_yaml' is allowed), provided
+                                  they are on the whitelist ('user_settings_whitelist')
+                                  and not on the blacklist ('user_settings_blacklist').
+                                  (This field together with 'user_settings_override*'
+                                  and 'system_settings' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsOverrideJson:
+                                description: An arbitrary JSON object allowing ECE
+                                  admins owners to set clusters' parameters (only
+                                  one of this and 'user_settings_override_yaml' is
+                                  allowed), ie in addition to the documented 'system_settings'.
+                                  (This field together with 'system_settings' and
+                                  'user_settings*' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsOverrideYaml:
+                                description: An arbitrary YAML object allowing (non-admin)
+                                  cluster owners to set their parameters (only one
+                                  of this and 'user_settings_json' is allowed), provided
+                                  they are on the whitelist ('user_settings_whitelist')
+                                  and not on the blacklist ('user_settings_blacklist').
+                                  (These field together with 'user_settings_override*'
+                                  and 'system_settings' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsYaml:
+                                description: An arbitrary YAML object allowing ECE
+                                  admins owners to set clusters' parameters (only
+                                  one of this and 'user_settings_override_json' is
+                                  allowed), ie in addition to the documented 'system_settings'.
+                                  (This field together with 'system_settings' and
+                                  'user_settings*' defines the total set of resource
+                                  settings)
+                                type: string
+                            type: object
+                          type: array
+                        elasticsearchClusterRefId:
+                          type: string
+                        refId:
+                          type: string
+                        topology:
+                          items:
+                            properties:
+                              instanceConfigurationId:
+                                type: string
+                              size:
+                                type: string
+                              sizeResource:
+                                description: Optional size type, defaults to "memory".
+                                type: string
+                              zoneCount:
+                                format: int64
+                                type: integer
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  deploymentTemplateId:
+                    description: Required Deployment Template identifier to create
+                      the deployment from
+                    type: string
+                  elasticsearch:
+                    description: Required Elasticsearch resource definition
+                    items:
+                      properties:
+                        autoscale:
+                          description: Enable or disable autoscaling. Defaults to
+                            the setting coming from the deployment template. Accepted
+                            values are "true" or "false".
+                          type: string
+                        config:
+                          description: Optional Elasticsearch settings which will
+                            be applied to all topologies unless overridden on the
+                            topology element
+                          items:
+                            properties:
+                              dockerImage:
+                                description: Optionally override the docker image
+                                  the Elasticsearch nodes will use. Note that this
+                                  field will only work for internal users only.
+                                type: string
+                              plugins:
+                                description: List of Elasticsearch supported plugins,
+                                  which vary from version to version. Check the Stack
+                                  Pack version to see which plugins are supported
+                                  for each version. This is currently only available
+                                  from the UI and [ecctl](https://www.elastic.co/guide/en/ecctl/master/ecctl_stack_list.html)
+                                items:
+                                  type: string
+                                type: array
+                              userSettingsJson:
+                                description: JSON-formatted user level "elasticsearch.yml"
+                                  setting overrides
+                                type: string
+                              userSettingsOverrideJson:
+                                description: JSON-formatted admin (ECE) level "elasticsearch.yml"
+                                  setting overrides
+                                type: string
+                              userSettingsOverrideYaml:
+                                description: YAML-formatted admin (ECE) level "elasticsearch.yml"
+                                  setting overrides
+                                type: string
+                              userSettingsYaml:
+                                description: YAML-formatted user level "elasticsearch.yml"
+                                  setting overrides
+                                type: string
+                            type: object
+                          type: array
+                        extension:
+                          description: Optional Elasticsearch extensions such as custom
+                            bundles or plugins.
+                          items:
+                            properties:
+                              name:
+                                description: Extension name.
+                                type: string
+                              type:
+                                description: Extension type, only `bundle` or `plugin`
+                                  are supported.
+                                type: string
+                              url:
+                                description: Bundle or plugin URL, the extension URL
+                                  can be obtained from the `ec_deployment_extension.<name>.url`
+                                  attribute or the API and cannot be a random HTTP
+                                  address that is hosted elsewhere.
+                                type: string
+                              version:
+                                description: Elasticsearch compatibility version.
+                                  Bundles should specify major or minor versions with
+                                  wildcards, such as `7.*` or `*` but **plugins must
+                                  use full version notation down to the patch level**,
+                                  such as `7.10.1` and wildcards are not allowed.
+                                type: string
+                            required:
+                            - name
+                            - type
+                            - url
+                            - version
+                            type: object
+                          type: array
+                        refId:
+                          description: Optional ref_id to set on the Elasticsearch
+                            resource
+                          type: string
+                        remoteCluster:
+                          description: Optional Elasticsearch remote clusters to configure
+                            for the Elasticsearch resource, can be set multiple times
+                          items:
+                            properties:
+                              alias:
+                                description: Alias for this Cross Cluster Search binding
+                                type: string
+                              deploymentId:
+                                description: Remote deployment ID
+                                type: string
+                              refId:
+                                description: Remote elasticsearch "ref_id", it is
+                                  best left to the default value
+                                type: string
+                              skipUnavailable:
+                                description: If true, skip the cluster during search
+                                  when disconnected
+                                type: boolean
+                            required:
+                            - alias
+                            - deploymentId
+                            type: object
+                          type: array
+                        snapshotSource:
+                          description: Optional snapshot source settings. Restore
+                            data from a snapshot of another deployment.
+                          items:
+                            properties:
+                              snapshotName:
+                                description: Name of the snapshot to restore. Use
+                                  '__latest_success__' to get the most recent successful
+                                  snapshot.
+                                type: string
+                              sourceElasticsearchClusterId:
+                                description: ID of the Elasticsearch cluster that
+                                  will be used as the source of the snapshot
+                                type: string
+                            required:
+                            - sourceElasticsearchClusterId
+                            type: object
+                          type: array
+                        topology:
+                          description: Optional topology element which must be set
+                            once but can be set multiple times to compose complex
+                            topologies
+                          items:
+                            properties:
+                              autoscaling:
+                                description: Optional Elasticsearch autoscaling settings,
+                                  such a maximum and minimum size and resources.
+                                items:
+                                  properties:
+                                    maxSize:
+                                      description: Maximum size value for the maximum
+                                        autoscaling setting.
+                                      type: string
+                                    maxSizeResource:
+                                      description: Maximum resource type for the maximum
+                                        autoscaling setting.
+                                      type: string
+                                    minSize:
+                                      description: Minimum size value for the minimum
+                                        autoscaling setting.
+                                      type: string
+                                    minSizeResource:
+                                      description: Minimum resource type for the minimum
+                                        autoscaling setting.
+                                      type: string
+                                  type: object
+                                type: array
+                              id:
+                                description: Required topology ID from the deployment
+                                  template
+                                type: string
+                              nodeTypeData:
+                                description: The node type for the Elasticsearch Topology
+                                  element (data node)
+                                type: string
+                              nodeTypeIngest:
+                                description: The node type for the Elasticsearch Topology
+                                  element (ingest node)
+                                type: string
+                              nodeTypeMaster:
+                                description: The node type for the Elasticsearch Topology
+                                  element (master node)
+                                type: string
+                              nodeTypeMl:
+                                description: The node type for the Elasticsearch Topology
+                                  element (machine learning node)
+                                type: string
+                              size:
+                                description: Optional amount of memory per node in
+                                  the "<size in GB>g" notation
+                                type: string
+                              sizeResource:
+                                description: Optional size type, defaults to "memory".
+                                type: string
+                              zoneCount:
+                                description: Optional number of zones that the Elasticsearch
+                                  cluster will span. This is used to set HA
+                                format: int64
+                                type: integer
+                            required:
+                            - id
+                            type: object
+                          type: array
+                        trustAccount:
+                          description: Optional Elasticsearch account trust settings.
+                          items:
+                            properties:
+                              accountId:
+                                description: The ID of the Account.
+                                type: string
+                              trustAll:
+                                description: If true, all clusters in this account
+                                  will by default be trusted and the `trust_allowlist`
+                                  is ignored.
+                                type: boolean
+                              trustAllowlist:
+                                description: The list of clusters to trust. Only used
+                                  when `trust_all` is false.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - accountId
+                            - trustAll
+                            type: object
+                          type: array
+                        trustExternal:
+                          description: Optional Elasticsearch external trust settings.
+                          items:
+                            properties:
+                              relationshipId:
+                                description: The ID of the external trust relationship.
+                                type: string
+                              trustAll:
+                                description: If true, all clusters in this account
+                                  will by default be trusted and the `trust_allowlist`
+                                  is ignored.
+                                type: boolean
+                              trustAllowlist:
+                                description: The list of clusters to trust. Only used
+                                  when `trust_all` is false.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - relationshipId
+                            - trustAll
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  enterpriseSearch:
+                    description: Optional Enterprise Search resource definition
+                    items:
+                      properties:
+                        config:
+                          description: Optionally define the Enterprise Search configuration
+                            options for the Enterprise Search Server
+                          items:
+                            properties:
+                              dockerImage:
+                                description: Optionally override the docker image
+                                  the Enterprise Search nodes will use. Note that
+                                  this field will only work for internal users only.
+                                type: string
+                              userSettingsJson:
+                                description: An arbitrary JSON object allowing (non-admin)
+                                  cluster owners to set their parameters (only one
+                                  of this and 'user_settings_yaml' is allowed), provided
+                                  they are on the whitelist ('user_settings_whitelist')
+                                  and not on the blacklist ('user_settings_blacklist').
+                                  (This field together with 'user_settings_override*'
+                                  and 'system_settings' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsOverrideJson:
+                                description: An arbitrary JSON object allowing ECE
+                                  admins owners to set clusters' parameters (only
+                                  one of this and 'user_settings_override_yaml' is
+                                  allowed), ie in addition to the documented 'system_settings'.
+                                  (This field together with 'system_settings' and
+                                  'user_settings*' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsOverrideYaml:
+                                description: An arbitrary YAML object allowing (non-admin)
+                                  cluster owners to set their parameters (only one
+                                  of this and 'user_settings_json' is allowed), provided
+                                  they are on the whitelist ('user_settings_whitelist')
+                                  and not on the blacklist ('user_settings_blacklist').
+                                  (These field together with 'user_settings_override*'
+                                  and 'system_settings' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsYaml:
+                                description: An arbitrary YAML object allowing ECE
+                                  admins owners to set clusters' parameters (only
+                                  one of this and 'user_settings_override_json' is
+                                  allowed), ie in addition to the documented 'system_settings'.
+                                  (This field together with 'system_settings' and
+                                  'user_settings*' defines the total set of resource
+                                  settings)
+                                type: string
+                            type: object
+                          type: array
+                        elasticsearchClusterRefId:
+                          type: string
+                        refId:
+                          type: string
+                        topology:
+                          items:
+                            properties:
+                              instanceConfigurationId:
+                                type: string
+                              size:
+                                type: string
+                              sizeResource:
+                                description: Optional size type, defaults to "memory".
+                                type: string
+                              zoneCount:
+                                format: int64
+                                type: integer
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  kibana:
+                    description: Optional Kibana resource definition
+                    items:
+                      properties:
+                        config:
+                          description: Optionally define the Kibana configuration
+                            options for the Kibana Server
+                          items:
+                            properties:
+                              dockerImage:
+                                description: Optionally override the docker image
+                                  the Kibana nodes will use. Note that this field
+                                  will only work for internal users only.
+                                type: string
+                              userSettingsJson:
+                                description: An arbitrary JSON object allowing (non-admin)
+                                  cluster owners to set their parameters (only one
+                                  of this and 'user_settings_yaml' is allowed), provided
+                                  they are on the whitelist ('user_settings_whitelist')
+                                  and not on the blacklist ('user_settings_blacklist').
+                                  (This field together with 'user_settings_override*'
+                                  and 'system_settings' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsOverrideJson:
+                                description: An arbitrary JSON object allowing ECE
+                                  admins owners to set clusters' parameters (only
+                                  one of this and 'user_settings_override_yaml' is
+                                  allowed), ie in addition to the documented 'system_settings'.
+                                  (This field together with 'system_settings' and
+                                  'user_settings*' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsOverrideYaml:
+                                description: An arbitrary YAML object allowing (non-admin)
+                                  cluster owners to set their parameters (only one
+                                  of this and 'user_settings_json' is allowed), provided
+                                  they are on the whitelist ('user_settings_whitelist')
+                                  and not on the blacklist ('user_settings_blacklist').
+                                  (These field together with 'user_settings_override*'
+                                  and 'system_settings' defines the total set of resource
+                                  settings)
+                                type: string
+                              userSettingsYaml:
+                                description: An arbitrary YAML object allowing ECE
+                                  admins owners to set clusters' parameters (only
+                                  one of this and 'user_settings_override_json' is
+                                  allowed), ie in addition to the documented 'system_settings'.
+                                  (This field together with 'system_settings' and
+                                  'user_settings*' defines the total set of resource
+                                  settings)
+                                type: string
+                            type: object
+                          type: array
+                        elasticsearchClusterRefId:
+                          type: string
+                        refId:
+                          type: string
+                        topology:
+                          items:
+                            properties:
+                              instanceConfigurationId:
+                                type: string
+                              size:
+                                type: string
+                              sizeResource:
+                                description: Optional size type, defaults to "memory".
+                                type: string
+                              zoneCount:
+                                format: int64
+                                type: integer
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  observability:
+                    description: Optional observability settings. Ship logs and metrics
+                      to a dedicated deployment.
+                    items:
+                      properties:
+                        deploymentId:
+                          type: string
+                        logs:
+                          type: boolean
+                        metrics:
+                          type: boolean
+                        refId:
+                          type: string
+                      required:
+                      - deploymentId
+                      type: object
+                    type: array
+                  region:
+                    description: Required ESS region where to create the deployment,
+                      for ECE environments "ece-region" must be set
+                    type: string
+                  requestId:
+                    description: Optional request_id to set on the create operation,
+                      only use when previous create attempts return with an error
+                      and a request_id is returned as part of the error
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Optional map of deployment tags
+                    type: object
+                  trafficFilter:
+                    description: Optional list of traffic filters to apply to this
+                      deployment.
+                    items:
+                      type: string
+                    type: array
+                  version:
+                    description: Required Elastic Stack version to use for all of
+                      the deployment resources
+                    type: string
+                required:
+                - deploymentTemplateId
+                - elasticsearch
+                - region
+                - version
+                type: object
+              providerConfigRef:
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              providerRef:
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+          status:
+            description: DeploymentStatus defines the observed state of Deployment.
+            properties:
+              atProvider:
+                properties:
+                  elasticsearchUsername:
+                    type: string
+                  id:
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
+                      type: string
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
