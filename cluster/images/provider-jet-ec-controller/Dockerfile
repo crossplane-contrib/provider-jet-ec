@@ -1,7 +1,9 @@
-FROM BASEIMAGE
+# TODO(hasheddan): this image is propagated from previous build tooling. Prefer
+# to switch to distroless.
+FROM alpine:3.13
 RUN apk --no-cache add ca-certificates bash
 
-ARG ARCH
+ARG TARGETARCH
 ARG TINI_VERSION
 ENV USER_ID=1001
 
@@ -15,23 +17,23 @@ ARG TERRAFORM_PROVIDER_DOWNLOAD_NAME
 ARG TERRAFORM_PROVIDER_DOWNLOAD_URL_PREFIX
 ## End of - Provider-dependent configuration
 
-ENV PLUGIN_DIR /terraform/provider-mirror/registry.terraform.io/${TERRAFORM_PROVIDER_SOURCE}/${TERRAFORM_PROVIDER_VERSION}/linux_${ARCH}
+ENV PLUGIN_DIR /terraform/provider-mirror/registry.terraform.io/${TERRAFORM_PROVIDER_SOURCE}/${TERRAFORM_PROVIDER_VERSION}/linux_${TARGETARCH}
 ENV TF_CLI_CONFIG_FILE /terraform/.terraformrc
 ENV TF_FORK 0
 
 RUN mkdir -p ${PLUGIN_DIR}
 
-ADD https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip /tmp
-ADD ${TERRAFORM_PROVIDER_DOWNLOAD_URL_PREFIX}/${TERRAFORM_PROVIDER_DOWNLOAD_NAME}_${TERRAFORM_PROVIDER_VERSION}_linux_${ARCH}.zip /tmp
+ADD https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${TARGETARCH}.zip /tmp
+ADD ${TERRAFORM_PROVIDER_DOWNLOAD_URL_PREFIX}/${TERRAFORM_PROVIDER_DOWNLOAD_NAME}_${TERRAFORM_PROVIDER_VERSION}_linux_${TARGETARCH}.zip /tmp
 
 ADD terraformrc.hcl ${TF_CLI_CONFIG_FILE}
 
-RUN unzip /tmp/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip -d /usr/local/bin \
+RUN unzip /tmp/terraform_${TERRAFORM_VERSION}_linux_${TARGETARCH}.zip -d /usr/local/bin \
   && chmod +x /usr/local/bin/terraform \
-  && rm /tmp/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip \
-  && unzip /tmp/${TERRAFORM_PROVIDER_DOWNLOAD_NAME}_${TERRAFORM_PROVIDER_VERSION}_linux_${ARCH}.zip -d ${PLUGIN_DIR} \
+  && rm /tmp/terraform_${TERRAFORM_VERSION}_linux_${TARGETARCH}.zip \
+  && unzip /tmp/${TERRAFORM_PROVIDER_DOWNLOAD_NAME}_${TERRAFORM_PROVIDER_VERSION}_linux_${TARGETARCH}.zip -d ${PLUGIN_DIR} \
   && chmod +x ${PLUGIN_DIR}/* \
-  && rm /tmp/${TERRAFORM_PROVIDER_DOWNLOAD_NAME}_${TERRAFORM_PROVIDER_VERSION}_linux_${ARCH}.zip \
+  && rm /tmp/${TERRAFORM_PROVIDER_DOWNLOAD_NAME}_${TERRAFORM_PROVIDER_VERSION}_linux_${TARGETARCH}.zip \
   && chown -R ${USER_ID}:${USER_ID} /terraform
 # End of - Setup Terraform environment
 

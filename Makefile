@@ -50,9 +50,9 @@ GO111MODULE = on
 # ====================================================================================
 # Setup Images
 
-DOCKER_REGISTRY ?= crossplane
+REGISTRY_ORGS = docker.io/crossplane
 IMAGES = provider-jet-ec provider-jet-ec-controller
--include build/makelib/image.mk
+-include build/makelib/imagelight.mk
 
 # ====================================================================================
 # Targets
