@@ -537,6 +537,9 @@ spec:
                           type: array
                       type: object
                     type: array
+                  name:
+                    description: Optional name for the deployment
+                    type: string
                   observability:
                     description: Optional observability settings. Ship logs and metrics
                       to a dedicated deployment.

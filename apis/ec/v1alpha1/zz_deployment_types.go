@@ -136,6 +136,10 @@ type DeploymentParameters struct {
 	// +kubebuilder:validation:Optional
 	Kibana []KibanaParameters `json:"kibana,omitempty" tf:"kibana,omitempty"`
 
+	// Optional name for the deployment
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
 	// Optional observability settings. Ship logs and metrics to a dedicated deployment.
 	// +kubebuilder:validation:Optional
 	Observability []ObservabilityParameters `json:"observability,omitempty" tf:"observability,omitempty"`

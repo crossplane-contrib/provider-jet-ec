@@ -1,0 +1,23 @@
+apiVersion: ec.ec.jet.crossplane.io/v1alpha1
+kind: Deployment
+metadata:
+  name: example
+spec:
+  forProvider:
+    name: example
+    deploymentTemplateId: gcp-io-optimized
+    region: gcp-us-west1
+    version: 8.0.1
+    apm:
+      - elasticsearchClusterRefId: elasticsearch
+        refId: apm
+    elasticsearch:
+      - refId: elasticsearch
+    kibana:
+      - elasticsearchClusterRefId: elasticsearch
+        refId: kibana
+  providerConfigRef:
+    name: ec-provider
+  writeConnectionSecretToRef:
+    name: example-ec-connection-details
+    namespace: default
