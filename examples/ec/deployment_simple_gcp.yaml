@@ -1,0 +1,17 @@
+apiVersion: ec.ec.jet.crossplane.io/v1alpha1
+kind: Deployment
+metadata:
+  name: simple
+spec:
+  forProvider:
+    name: simple
+    deploymentTemplateId: gcp-io-optimized
+    elasticsearch:
+      - refId: elasticsearch
+    region: gcp-us-west1
+    version: 8.0.1
+  providerConfigRef:
+    name: ec-provider
+  writeConnectionSecretToRef:
+    name: simple-ec-connection-details
+    namespace: default

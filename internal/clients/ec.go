@@ -31,13 +31,15 @@ import (
 )
 
 const (
+	keyAPIKey   = "apikey"
 	keyUsername = "username"
 	keyPassword = "password"
 	keyHost     = "endpoint"
 
 	// EC credentials environment variable names
-	envUsername = "username"
-	envPassword = "password"
+	envAPIKey   = "EC_API_KEY"
+	envUsername = "EC_USERNAME"
+	envPassword = "EC_PASSWORD"
 	envHost     = "endpoint"
 )
 
@@ -50,6 +52,9 @@ const (
 	errTrackUsage           = "cannot track ProviderConfig usage"
 	errExtractCredentials   = "cannot extract credentials"
 	errUnmarshalCredentials = "cannot unmarshal ec credentials as JSON"
+
+	errEitherAPIKeyOrUP = "either apiKey OR username and password may be supplied"
+	errUnameAndPword    = "username and password are required"
 )
 
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
@@ -91,11 +96,42 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		ps.Configuration = map[string]interface{}{
 			envHost: ecCreds[keyHost],
 		}
-		// set environment variables for sensitive provider configuration
-		ps.Env = []string{
-			fmt.Sprintf(fmtEnvVar, envUsername, ecCreds[keyUsername]),
-			fmt.Sprintf(fmtEnvVar, envPassword, ecCreds[keyPassword]),
+
+		envVars, err := getAuthEnvVars(ecCreds)
+		if err != nil {
+			return ps, errors.Wrap(err, errExtractCredentials)
 		}
+
+		ps.Env = envVars
+
 		return ps, nil
 	}
+}
+
+func getAuthEnvVars(ecCreds map[string]string) ([]string, error) {
+	// set environment variables for sensitive provider configuration
+	// NOTE(@tnthornton) either apiKey OR username and password are valid
+	// not both.
+	apikey := ecCreds[keyAPIKey]
+	uname := ecCreds[keyUsername]
+	pword := ecCreds[keyPassword]
+
+	if apikey != "" && (uname != "" || pword != "") {
+		return nil, errors.New(errEitherAPIKeyOrUP)
+	}
+
+	if apikey != "" {
+		return []string{
+			fmt.Sprintf(fmtEnvVar, envAPIKey, apikey),
+		}, nil
+	}
+
+	if uname == "" || pword == "" {
+		return nil, errors.New(errUnameAndPword)
+	}
+
+	return []string{
+		fmt.Sprintf(fmtEnvVar, envUsername, uname),
+		fmt.Sprintf(fmtEnvVar, envPassword, pword),
+	}, nil
 }

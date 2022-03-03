@@ -17,14 +17,23 @@ limitations under the License.
 package config
 
 import (
-	tjconfig "github.com/crossplane/terrajet/pkg/config"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	tjconfig "github.com/crossplane/terrajet/pkg/config"
+
+	"github.com/crossplane-contrib/provider-jet-ec/config/ec"
 )
 
 const (
 	resourcePrefix = "ec"
 	modulePath     = "github.com/crossplane-contrib/provider-jet-ec"
 )
+
+// IncludedResources lists all resource patterns included in small set release.
+var includedResources = []string{
+	// deployments
+	"ec_deployment$",
+}
 
 // GetProvider returns provider configuration
 func GetProvider(resourceMap map[string]*schema.Resource) *tjconfig.Provider {
@@ -36,10 +45,14 @@ func GetProvider(resourceMap map[string]*schema.Resource) *tjconfig.Provider {
 	}
 
 	pc := tjconfig.NewProvider(resourceMap, resourcePrefix, modulePath,
-		tjconfig.WithDefaultResourceFn(defaultResourceFn))
+		tjconfig.WithDefaultResourceFn(defaultResourceFn),
+		tjconfig.WithIncludeList(includedResources),
+		tjconfig.WithRootGroup("ec.jet.crossplane.io"),
+		tjconfig.WithShortName("ecjet"),
+	)
 
 	for _, configure := range []func(provider *tjconfig.Provider){
-		// add custom config functions
+		ec.Configure,
 	} {
 		configure(pc)
 	}

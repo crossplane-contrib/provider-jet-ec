@@ -25,10 +25,6 @@ import (
 	tjconfig "github.com/crossplane/terrajet/pkg/config"
 	"github.com/crossplane/terrajet/pkg/terraform"
 
-	elasticsearchkeystore "github.com/crossplane-contrib/provider-jet-ec/internal/controller/deployment/elasticsearchkeystore"
-	extension "github.com/crossplane-contrib/provider-jet-ec/internal/controller/deployment/extension"
-	trafficfilter "github.com/crossplane-contrib/provider-jet-ec/internal/controller/deployment/trafficfilter"
-	trafficfilterassociation "github.com/crossplane-contrib/provider-jet-ec/internal/controller/deployment/trafficfilterassociation"
 	deployment "github.com/crossplane-contrib/provider-jet-ec/internal/controller/ec/deployment"
 	providerconfig "github.com/crossplane-contrib/provider-jet-ec/internal/controller/providerconfig"
 )
@@ -37,10 +33,6 @@ import (
 // the supplied manager.
 func Setup(mgr ctrl.Manager, l logging.Logger, wl workqueue.RateLimiter, ps terraform.SetupFn, ws *terraform.WorkspaceStore, cfg *tjconfig.Provider, concurrency int) error {
 	for _, setup := range []func(ctrl.Manager, logging.Logger, workqueue.RateLimiter, terraform.SetupFn, *terraform.WorkspaceStore, *tjconfig.Provider, int) error{
-		elasticsearchkeystore.Setup,
-		extension.Setup,
-		trafficfilter.Setup,
-		trafficfilterassociation.Setup,
 		deployment.Setup,
 		providerconfig.Setup,
 	} {

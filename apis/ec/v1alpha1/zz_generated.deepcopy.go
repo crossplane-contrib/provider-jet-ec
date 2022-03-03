@@ -339,6 +339,11 @@ func (in *DeploymentParameters) DeepCopyInto(out *DeploymentParameters) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Name != nil {
+		in, out := &in.Name, &out.Name
+		*out = new(string)
+		**out = **in
+	}
 	if in.Observability != nil {
 		in, out := &in.Observability, &out.Observability
 		*out = make([]ObservabilityParameters, len(*in))
