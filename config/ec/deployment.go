@@ -22,6 +22,9 @@ const (
 func Configure(p *config.Provider) {
 	p.AddResourceConfigurator(deployment, func(r *config.Resource) {
 		r.ExternalName = config.IdentifierFromProvider
+		// NOTE(@tnthornton) set the ShortGroup to "" in order to keep the
+		// group from being represented as "ec.ec"
+		r.ShortGroup = ""
 
 		r.Sensitive = config.Sensitive{
 			AdditionalConnectionDetailsFn: func(attr map[string]interface{}) (map[string][]byte, error) {

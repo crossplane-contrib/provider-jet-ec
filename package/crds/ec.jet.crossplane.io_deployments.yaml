@@ -4,9 +4,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: deployments.ec.ec.jet.crossplane.io
+  name: deployments.ec.jet.crossplane.io
 spec:
-  group: ec.ec.jet.crossplane.io
+  group: ec.jet.crossplane.io
   names:
     categories:
     - crossplane

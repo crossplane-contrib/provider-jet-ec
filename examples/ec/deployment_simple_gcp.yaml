@@ -1,4 +1,4 @@
-apiVersion: ec.ec.jet.crossplane.io/v1alpha1
+apiVersion: ec.jet.crossplane.io/v1alpha1
 kind: Deployment
 metadata:
   name: simple
