@@ -39,11 +39,11 @@ func Configure(p *config.Provider) {
 				if a, ok := attr[elasticsearch].([]interface{}); ok {
 					for i, nestedAttr := range a {
 						if nestedMap, ok := nestedAttr.(map[string]interface{}); ok {
-							if httpEndpoint, ok := nestedMap[httpEndpoint].(string); ok {
-								conn[fmt.Sprintf(endpointFmt, httpEndpoint, i)] = []byte(httpEndpoint)
+							if endpoint, ok := nestedMap[httpEndpoint].(string); ok {
+								conn[fmt.Sprintf(endpointFmt, httpEndpoint, i)] = []byte(endpoint)
 							}
-							if httpsEndpoint, ok := nestedMap[httpsEndpoint].(string); ok {
-								conn[fmt.Sprintf(endpointFmt, httpsEndpoint, i)] = []byte(httpsEndpoint)
+							if endpoint, ok := nestedMap[httpsEndpoint].(string); ok {
+								conn[fmt.Sprintf(endpointFmt, httpsEndpoint, i)] = []byte(endpoint)
 							}
 						}
 					}
